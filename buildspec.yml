@@ -1,0 +1,45 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      nodejs: 14 # Specify the Node.js version as per your requirement
+    commands:
+      - echo "Installing Docker"
+      - yum update -y
+      - amazon-linux-extras install docker -y
+      - service docker start
+      - usermod -a -G docker ec2-user
+      - curl -L https://github.com/docker/compose/releases/download/1.29.2/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose
+      - chmod +x /usr/local/bin/docker-compose
+      - ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
+      - docker-compose version
+
+  pre_build:
+    commands:
+      - echo "Logging in to Amazon ECR..."
+      - $(aws ecr get-login --no-include-email --region $AWS_DEFAULT_REGION)
+      - echo "Pulling MySQL image..."
+      - docker-compose pull
+
+  build:
+    commands:
+      - echo "Building Docker images..."
+      - docker-compose build
+      - echo "Starting Docker containers..."
+      - docker-compose up -d
+      - echo "Waiting for MySQL to initialize..."
+      - sleep 30 # Ensure MySQL has enough time to initialize, adjust this as necessary
+      - echo "Running any tests (optional)..."
+      # Add your test commands here, if necessary
+
+  post_build:
+    commands:
+      - echo "Stopping Docker containers..."
+      - docker-compose down
+      - echo "Build completed."
+
+artifacts:
+  files:
+    - '**/*' # Include your build artifacts if necessary
+
