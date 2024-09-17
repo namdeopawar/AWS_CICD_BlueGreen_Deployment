@@ -3,12 +3,14 @@ version: 0.2
 phases:
   install:
     runtime-versions:
-      nodejs: 14 # Specify the Node.js version as per your requirement
+      nodejs: 14 # Update as necessary
     commands:
       - echo "Installing Docker"
       - apt-get update
       - apt-get install -y docker.io
-      - service docker start
+      - echo "Starting Docker using systemctl"
+      - systemctl enable docker
+      - systemctl start docker
       - usermod -a -G docker $USER
       - echo "Installing Docker Compose"
       - curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
@@ -30,9 +32,8 @@ phases:
       - echo "Starting Docker containers..."
       - docker-compose up -d
       - echo "Waiting for MySQL to initialize..."
-      - sleep 30 # Ensure MySQL has enough time to initialize, adjust this as necessary
-      - echo "Running any tests (optional)..."
-      # Add your test commands here, if necessary
+      - sleep 30 # Adjust as needed
+      - echo "Running any tests..."
 
   post_build:
     commands:
@@ -42,5 +43,5 @@ phases:
 
 artifacts:
   files:
-    - '**/*' # Include your build artifacts if necessary
+    - '**/*'
 
