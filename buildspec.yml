@@ -6,11 +6,12 @@ phases:
       nodejs: 14 # Specify the Node.js version as per your requirement
     commands:
       - echo "Installing Docker"
-      - yum update -y
-      - amazon-linux-extras install docker -y
+      - apt-get update
+      - apt-get install -y docker.io
       - service docker start
-      - usermod -a -G docker ec2-user
-      - curl -L https://github.com/docker/compose/releases/download/1.29.2/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose
+      - usermod -a -G docker $USER
+      - echo "Installing Docker Compose"
+      - curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
       - chmod +x /usr/local/bin/docker-compose
       - ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
       - docker-compose version
